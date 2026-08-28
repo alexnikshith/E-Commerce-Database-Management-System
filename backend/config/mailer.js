@@ -11,24 +11,17 @@ function formatCurrency(amount) {
 function createTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT, 10) || 587;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const user = process.env.SMTP_USER || 'nikshithgurram2006@gmail.com';
+  const pass = process.env.SMTP_PASS || 'stfifnxxvapjbmtk';
 
-  if (user && pass) {
-    return nodemailer.createTransport({
-      host: host,
-      port: port,
-      secure: port === 465,
-      auth: {
-        user: user,
-        pass: pass
-      }
-    });
-  }
-
-  // Fallback to Logger Stream Transport if no SMTP creds configured
   return nodemailer.createTransport({
-    jsonTransport: true
+    host: host,
+    port: port,
+    secure: port === 465,
+    auth: {
+      user: user,
+      pass: pass
+    }
   });
 }
 
@@ -116,7 +109,7 @@ const sendOrderConfirmationEmail = async (orderDetails) => {
     `;
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"E-Commerce Store" <no-reply@ecommerce.com>',
+      from: process.env.EMAIL_FROM || '"E-Commerce Store" <nikshithgurram2006@gmail.com>',
       to: customer_email,
       subject: `Order Confirmation #${order_id} - E-Commerce Store`,
       html: htmlContent
