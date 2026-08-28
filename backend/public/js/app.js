@@ -2,6 +2,8 @@
  * E-Commerce DBMS Dashboard - Interactive JavaScript SPA Controller
  */
 
+let pendingDeleteAction = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation Tabs Logic
   const navItems = document.querySelectorAll('.nav-item');
@@ -99,6 +101,16 @@ function setupModals() {
   document.getElementById('form-create-product')?.addEventListener('submit', handleProductSubmit);
   document.getElementById('form-create-user')?.addEventListener('submit', handleUserSubmit);
   document.getElementById('form-create-review')?.addEventListener('submit', handleReviewSubmit);
+  document.getElementById('form-update-order-status')?.addEventListener('submit', handleUpdateOrderStatusSubmit);
+
+  // Confirm Delete Button Handler
+  document.getElementById('btn-confirm-delete-submit')?.addEventListener('click', async () => {
+    if (typeof pendingDeleteAction === 'function') {
+      await pendingDeleteAction();
+      pendingDeleteAction = null;
+      closeModal('modal-confirm-delete');
+    }
+  });
 }
 
 function openModal(id) {
@@ -222,6 +234,8 @@ function renderProductsTable(products) {
       ? `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation"></i> Low (${p.stock_quantity})</span>`
       : `<span class="badge badge-success">${p.stock_quantity} units</span>`;
 
+    const safeName = p.product_name.replace(/'/g, "\\'");
+
     return `
       <tr>
         <td>#${p.product_id}</td>
@@ -231,9 +245,14 @@ function renderProductsTable(products) {
         <td style="font-weight:700;">${formatCurrency(p.price)}</td>
         <td>${stockBadge}</td>
         <td>
-          <button class="btn btn-secondary" onclick="viewProductDetails(${p.product_id})" style="padding: 5px 12px; font-size: 12px;">
-            <i class="fa-solid fa-eye"></i> Details
-          </button>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" onclick="viewProductDetails(${p.product_id})" style="padding: 4px 10px; font-size: 11.5px;">
+              <i class="fa-solid fa-eye"></i> Details
+            </button>
+            <button class="btn btn-secondary" onclick="confirmDeleteProduct(${p.product_id}, '${safeName}')" style="padding: 4px 10px; font-size: 11.5px; color:var(--danger); border-color:var(--danger);">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -316,6 +335,27 @@ async function viewProductDetails(id) {
   }
 }
 
+// Confirm Delete Product
+function confirmDeleteProduct(id, name) {
+  document.getElementById('delete-confirm-message').innerHTML = `Are you sure you want to delete product <strong>${name}</strong> (ID #${id})?`;
+  pendingDeleteAction = async () => {
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        showToast(json.message, 'success');
+        loadDashboardKPIs();
+        loadProducts();
+      } else {
+        showToast(json.error ? json.error.message : 'Failed to delete product', 'error');
+      }
+    } catch (e) {
+      showToast('Product deletion error', 'error');
+    }
+  };
+  openModal('modal-confirm-delete');
+}
+
 // 4. Load Orders Tab
 async function loadOrders() {
   try {
@@ -333,9 +373,17 @@ async function loadOrders() {
           <td><span class="badge badge-success">${o.status}</span></td>
           <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(o.total_amount)}</td>
           <td>
-            <button class="btn btn-secondary" onclick="viewOrderDetails(${o.order_id})" style="padding: 5px 12px; font-size: 12px;">
-              <i class="fa-solid fa-receipt"></i> View Order
-            </button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" onclick="viewOrderDetails(${o.order_id})" style="padding: 4px 8px; font-size: 11.5px;">
+                <i class="fa-solid fa-receipt"></i> View
+              </button>
+              <button class="btn btn-secondary" onclick="openUpdateStatusModal(${o.order_id}, '${o.status}')" style="padding: 4px 8px; font-size: 11.5px;">
+                <i class="fa-solid fa-pen-to-square"></i> Status
+              </button>
+              <button class="btn btn-secondary" onclick="confirmDeleteOrder(${o.order_id})" style="padding: 4px 8px; font-size: 11.5px; color:var(--danger); border-color:var(--danger);">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            </div>
           </td>
         </tr>
       `).join('');
@@ -424,6 +472,63 @@ async function viewOrderDetails(orderId) {
   }
 }
 
+// Open Order Status Update Modal
+function openUpdateStatusModal(orderId, currentStatus) {
+  document.getElementById('status-target-order-id').value = orderId;
+  document.getElementById('order-status-select').value = currentStatus || 'Confirmed';
+  openModal('modal-update-status');
+}
+
+// Handle Order Status Update Form Submit
+async function handleUpdateOrderStatusSubmit(e) {
+  e.preventDefault();
+  const orderId = document.getElementById('status-target-order-id').value;
+  const status = document.getElementById('order-status-select').value;
+
+  try {
+    const res = await fetch(`/api/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+
+    const json = await res.json();
+    if (res.ok && json.success) {
+      showToast(json.message, 'success');
+      closeModal('modal-update-status');
+      loadDashboardKPIs();
+      loadOverviewAnalytics();
+      loadOrders();
+    } else {
+      showToast(json.error ? json.error.message : 'Failed to update order status', 'error');
+    }
+  } catch (err) {
+    showToast('Order status update failed', 'error');
+  }
+}
+
+// Confirm Delete Order
+function confirmDeleteOrder(id) {
+  document.getElementById('delete-confirm-message').innerHTML = `Are you sure you want to delete <strong>Order #${id}</strong>?`;
+  pendingDeleteAction = async () => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        showToast(json.message, 'success');
+        loadDashboardKPIs();
+        loadOverviewAnalytics();
+        loadOrders();
+      } else {
+        showToast(json.error ? json.error.message : 'Failed to delete order', 'error');
+      }
+    } catch (e) {
+      showToast('Order deletion error', 'error');
+    }
+  };
+  openModal('modal-confirm-delete');
+}
+
 // 5. Load Inventory Tab
 async function loadInventory() {
   try {
@@ -465,21 +570,52 @@ async function loadCustomers() {
 
     const body = document.getElementById('customers-table-body');
     if (json.success && json.data.length > 0) {
-      body.innerHTML = json.data.map(c => `
-        <tr>
-          <td>#${c.user_id}</td>
-          <td><strong>${c.customer_name}</strong></td>
-          <td>${c.email}</td>
-          <td><strong>${c.total_orders}</strong> orders</td>
-          <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(c.total_spent)}</td>
-        </tr>
-      `).join('');
+      body.innerHTML = json.data.map(c => {
+        const safeName = c.customer_name.replace(/'/g, "\\'");
+
+        return `
+          <tr>
+            <td>#${c.user_id}</td>
+            <td><strong>${c.customer_name}</strong></td>
+            <td>${c.email}</td>
+            <td><strong>${c.total_orders}</strong> orders</td>
+            <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(c.total_spent)}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="confirmDeleteCustomer(${c.user_id}, '${safeName}')" style="padding: 4px 10px; font-size: 11.5px; color:var(--danger); border-color:var(--danger);">
+                <i class="fa-solid fa-user-minus"></i> Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     } else {
-      body.innerHTML = '<tr><td colspan="5" style="text-align:center;">No registered customers found.</td></tr>';
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;">No registered customers found.</td></tr>';
     }
   } catch (e) {
     console.error('Failed to load customers:', e);
   }
+}
+
+// Confirm Delete Customer
+function confirmDeleteCustomer(id, name) {
+  document.getElementById('delete-confirm-message').innerHTML = `Are you sure you want to delete customer <strong>${name}</strong> (ID #${id})?`;
+  pendingDeleteAction = async () => {
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        showToast(json.message, 'success');
+        loadDashboardKPIs();
+        loadOverviewAnalytics();
+        loadCustomers();
+      } else {
+        showToast(json.error ? json.error.message : 'Failed to delete customer', 'error');
+      }
+    } catch (e) {
+      showToast('Customer deletion error', 'error');
+    }
+  };
+  openModal('modal-confirm-delete');
 }
 
 // 7. Load Reviews Tab

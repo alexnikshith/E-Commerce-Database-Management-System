@@ -438,9 +438,114 @@ const addOrderItem = async (req, res, next) => {
   }
 };
 
+/**
+ * DELETE /api/orders/:id
+ * Delete an order and its associated payments/shipments/items in a transaction
+ */
+const deleteOrder = async (req, res, next) => {
+  const connection = await pool.getConnection();
+  try {
+    const orderId = parseInt(req.params.id, 10);
+
+    if (isNaN(orderId) || orderId <= 0) {
+      connection.release();
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid order ID. Must be a positive integer.' }
+      });
+    }
+
+    const [existing] = await connection.execute(
+      'SELECT order_id FROM orders WHERE order_id = ?',
+      [orderId]
+    );
+
+    if (existing.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        error: { message: `Order with ID ${orderId} not found.` }
+      });
+    }
+
+    await connection.beginTransaction();
+
+    await connection.execute('DELETE FROM payments WHERE order_id = ?', [orderId]);
+    await connection.execute('DELETE FROM shipments WHERE order_id = ?', [orderId]);
+    await connection.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+    await connection.execute('DELETE FROM orders WHERE order_id = ?', [orderId]);
+
+    await connection.commit();
+    connection.release();
+
+    res.status(200).json({
+      success: true,
+      message: `Order #${orderId} deleted successfully.`
+    });
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/orders/:id/status
+ * Update status of an existing order
+ */
+const updateOrderStatus = async (req, res, next) => {
+  try {
+    const orderId = parseInt(req.params.id, 10);
+
+    if (isNaN(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid order ID. Must be a positive integer.' }
+      });
+    }
+
+    const { status } = req.body;
+    const validStatuses = ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'];
+
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: { message: `status is required and must be one of: ${validStatuses.join(', ')}.` }
+      });
+    }
+
+    const [existing] = await pool.execute(
+      'SELECT order_id, status FROM orders WHERE order_id = ?',
+      [orderId]
+    );
+
+    if (existing.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: { message: `Order with ID ${orderId} not found.` }
+      });
+    }
+
+    await pool.execute(
+      'UPDATE orders SET status = ? WHERE order_id = ?',
+      [status, orderId]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Order #${orderId} status updated to '${status}'.`,
+      data: { order_id: orderId, status: status }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getOrders,
   getOrderById,
   createOrder,
-  addOrderItem
+  addOrderItem,
+  deleteOrder,
+  updateOrderStatus
 };

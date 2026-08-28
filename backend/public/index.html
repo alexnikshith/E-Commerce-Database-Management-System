@@ -270,6 +270,7 @@
                     <th>Email</th>
                     <th>Orders Placed</th>
                     <th>Total Amount Spent</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="customers-table-body">
@@ -468,6 +469,52 @@
       <div id="order-details-content">
         <!-- Rendered via JS -->
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: Custom Delete Confirmation Modal Popup -->
+  <div class="modal-overlay" id="modal-confirm-delete">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Deletion</div>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div style="margin-bottom:20px;">
+        <p id="delete-confirm-message" style="font-size:14px; color:var(--text-main); margin-bottom:8px;"></p>
+        <p style="font-size:12px; color:var(--text-muted);">This action will permanently delete the record from the MySQL database and cannot be undone.</p>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-confirm-delete')">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-delete-submit" style="background:var(--danger); border-color:var(--danger);">
+          <i class="fa-solid fa-trash-can"></i> Permanently Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 8: Custom Update Order Status Modal Popup -->
+  <div class="modal-overlay" id="modal-update-status">
+    <div class="modal" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Order Status</div>
+        <button class="close-btn">&times;</button>
+      </div>
+      <form id="form-update-order-status">
+        <input type="hidden" id="status-target-order-id">
+        <div class="form-group">
+          <label class="form-label">Order Fulfillment Status</label>
+          <select id="order-status-select" class="form-control" required>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
+          <i class="fa-solid fa-check"></i> Update Order Status
+        </button>
+      </form>
     </div>
   </div>
 

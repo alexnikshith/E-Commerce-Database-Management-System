@@ -417,10 +417,63 @@ const createProductReview = async (req, res, next) => {
   }
 };
 
+/**
+ * DELETE /api/products/:id
+ * Delete a product and its associated inventory/reviews in a transaction
+ */
+const deleteProduct = async (req, res, next) => {
+  const connection = await pool.getConnection();
+  try {
+    const productId = parseInt(req.params.id, 10);
+
+    if (isNaN(productId) || productId <= 0) {
+      connection.release();
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid product ID. Must be a positive integer.' }
+      });
+    }
+
+    const [existing] = await connection.execute(
+      'SELECT product_id, product_name FROM products WHERE product_id = ?',
+      [productId]
+    );
+
+    if (existing.length === 0) {
+      connection.release();
+      return res.status(404).json({
+        success: false,
+        error: { message: `Product with ID ${productId} not found.` }
+      });
+    }
+
+    await connection.beginTransaction();
+
+    await connection.execute('DELETE FROM reviews WHERE product_id = ?', [productId]);
+    await connection.execute('DELETE FROM inventory WHERE product_id = ?', [productId]);
+    await connection.execute('DELETE FROM cart_items WHERE product_id = ?', [productId]);
+    await connection.execute('DELETE FROM order_items WHERE product_id = ?', [productId]);
+    await connection.execute('DELETE FROM products WHERE product_id = ?', [productId]);
+
+    await connection.commit();
+    connection.release();
+
+    res.status(200).json({
+      success: true,
+      message: `Product '${existing[0].product_name}' (ID #${productId}) deleted successfully.`
+    });
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+    next(error);
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
-  createProductReview
+  createProductReview,
+  deleteProduct
 };
