@@ -46,9 +46,8 @@ function showToast(message, type = 'success') {
   toast.className = `toast ${type}`;
   
   const icon = type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation';
-  const color = type === 'success' ? 'var(--success)' : 'var(--danger)';
   
-  toast.innerHTML = `<i class="fa-solid ${icon}" style="color: ${color}"></i> <span>${message}</span>`;
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
@@ -61,21 +60,21 @@ function showToast(message, type = 'success') {
 function setupModals() {
   const modalOverlays = document.querySelectorAll('.modal-overlay');
   
-  document.getElementById('btn-open-order-modal').addEventListener('click', async () => {
+  document.getElementById('btn-open-order-modal')?.addEventListener('click', async () => {
     await populateOrderModalSelects();
     openModal('modal-order');
   });
 
-  document.getElementById('btn-open-product-modal').addEventListener('click', async () => {
+  document.getElementById('btn-open-product-modal')?.addEventListener('click', async () => {
     await populateCategorySelect('product-category-select');
     openModal('modal-product');
   });
 
-  document.getElementById('btn-open-user-modal').addEventListener('click', () => {
+  document.getElementById('btn-open-user-modal')?.addEventListener('click', () => {
     openModal('modal-user');
   });
 
-  document.getElementById('btn-open-review-modal').addEventListener('click', async () => {
+  document.getElementById('btn-open-review-modal')?.addEventListener('click', async () => {
     await populateReviewModalSelects();
     openModal('modal-review');
   });
@@ -96,10 +95,10 @@ function setupModals() {
   });
 
   // Submit Forms
-  document.getElementById('form-create-order').addEventListener('submit', handleOrderSubmit);
-  document.getElementById('form-create-product').addEventListener('submit', handleProductSubmit);
-  document.getElementById('form-create-user').addEventListener('submit', handleUserSubmit);
-  document.getElementById('form-create-review').addEventListener('submit', handleReviewSubmit);
+  document.getElementById('form-create-order')?.addEventListener('submit', handleOrderSubmit);
+  document.getElementById('form-create-product')?.addEventListener('submit', handleProductSubmit);
+  document.getElementById('form-create-user')?.addEventListener('submit', handleUserSubmit);
+  document.getElementById('form-create-review')?.addEventListener('submit', handleReviewSubmit);
 }
 
 function openModal(id) {
@@ -174,7 +173,7 @@ async function loadOverviewAnalytics() {
           <td><span class="badge badge-info">${p.category_name}</span></td>
           <td>${formatCurrency(p.price)}</td>
           <td><strong>${p.units_sold}</strong> units</td>
-          <td style="color: var(--success); font-weight:700;">${formatCurrency(p.total_revenue)}</td>
+          <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(p.total_revenue)}</td>
         </tr>
       `).join('');
     } else {
@@ -187,7 +186,7 @@ async function loadOverviewAnalytics() {
       catBody.innerHTML = catJson.data.map(c => `
         <tr>
           <td><strong>${c.category_name}</strong></td>
-          <td style="color: var(--success); font-weight:700;">${formatCurrency(c.category_revenue)}</td>
+          <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(c.category_revenue)}</td>
         </tr>
       `).join('');
     } else {
@@ -232,7 +231,7 @@ function renderProductsTable(products) {
         <td style="font-weight:700;">${formatCurrency(p.price)}</td>
         <td>${stockBadge}</td>
         <td>
-          <button class="btn btn-secondary" onclick="viewProductDetails(${p.product_id})" style="padding: 4px 10px; font-size: 11px;">
+          <button class="btn btn-secondary" onclick="viewProductDetails(${p.product_id})" style="padding: 5px 12px; font-size: 12px;">
             <i class="fa-solid fa-eye"></i> Details
           </button>
         </td>
@@ -254,7 +253,7 @@ document.getElementById('product-search-input')?.addEventListener('input', (e) =
   renderProductsTable(filtered);
 });
 
-// View Product Details
+// Custom UI Popup: View Product Details
 async function viewProductDetails(id) {
   try {
     const res = await fetch(`/api/products/${id}`);
@@ -262,10 +261,55 @@ async function viewProductDetails(id) {
 
     if (json.success) {
       const p = json.data;
-      let reviewText = p.reviews.length > 0
-        ? p.reviews.map(r => `⭐ ${r.rating}/5 by ${r.reviewer_name}: "${r.comment || ''}"`).join('\n')
-        : 'No reviews yet.';
-      alert(`Product Details (#${p.product_id}):\nName: ${p.product_name}\nCategory: ${p.category_name}\nBrand: ${p.brand || 'N/A'}\nPrice: ${formatCurrency(p.price)}\nStock: ${p.stock_quantity}\n\nReviews (${p.reviews_count}):\n${reviewText}`);
+      const reviewsHtml = p.reviews.length > 0
+        ? p.reviews.map(r => `
+            <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:12px; margin-bottom:8px;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <strong style="font-size:13px;">${r.reviewer_name}</strong>
+                <span style="color:var(--warning); font-weight:700;">⭐ ${r.rating}/5</span>
+              </div>
+              <p style="font-size:12.5px; color:var(--text-secondary);">"${r.comment || 'No comment.'}"</p>
+              <small style="font-size:10.5px; color:var(--text-muted);">${new Date(r.review_date).toLocaleDateString()}</small>
+            </div>
+          `).join('')
+        : '<p style="font-size:13px; color:var(--text-muted); font-style:italic;">No reviews written yet.</p>';
+
+      const content = document.getElementById('product-details-content');
+      content.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="font-size:18px; font-weight:800;">${p.product_name}</h3>
+            <span class="badge badge-info">${p.category_name}</span>
+          </div>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">${p.description || 'No product description available.'}</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; background:var(--bg-main); padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+            <div>
+              <small class="form-label" style="font-size:10px;">Brand</small>
+              <strong style="font-size:13px;">${p.brand || 'N/A'}</strong>
+            </div>
+            <div>
+              <small class="form-label" style="font-size:10px;">Price</small>
+              <strong style="font-size:13px; color:var(--accent-yellow-dark);">${formatCurrency(p.price)}</strong>
+            </div>
+            <div>
+              <small class="form-label" style="font-size:10px;">Stock Level</small>
+              <strong style="font-size:13px;">${p.stock_quantity} units</strong>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:14px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-comments" style="color:var(--accent-yellow);"></i> Customer Reviews (${p.reviews_count})
+          </h4>
+          <div style="max-height:220px; overflow-y:auto; padding-right:4px;">
+            ${reviewsHtml}
+          </div>
+        </div>
+      `;
+
+      openModal('modal-product-details');
     }
   } catch (e) {
     showToast('Failed to load product details', 'error');
@@ -287,10 +331,10 @@ async function loadOrders() {
           <td>${new Date(o.order_date).toLocaleDateString('en-IN')}</td>
           <td>${o.total_items} items</td>
           <td><span class="badge badge-success">${o.status}</span></td>
-          <td style="color: var(--success); font-weight:700;">${formatCurrency(o.total_amount)}</td>
+          <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(o.total_amount)}</td>
           <td>
-            <button class="btn btn-secondary" onclick="viewOrderDetails(${o.order_id})" style="padding: 4px 10px; font-size: 11px;">
-              <i class="fa-solid fa-list-check"></i> View Order
+            <button class="btn btn-secondary" onclick="viewOrderDetails(${o.order_id})" style="padding: 5px 12px; font-size: 12px;">
+              <i class="fa-solid fa-receipt"></i> View Order
             </button>
           </td>
         </tr>
@@ -303,7 +347,7 @@ async function loadOrders() {
   }
 }
 
-// View Single Order Line Items
+// Custom UI Popup: View Single Order Line Items
 async function viewOrderDetails(orderId) {
   try {
     const res = await fetch(`/api/orders/${orderId}`);
@@ -311,11 +355,69 @@ async function viewOrderDetails(orderId) {
 
     if (json.success) {
       const o = json.data;
-      const itemsList = o.items.map(i => `- ${i.product_name} x${i.quantity} @ ${formatCurrency(i.unit_price)} = ${formatCurrency(i.item_total)}`).join('\n');
-      const paymentInfo = o.payment ? `Payment: ${o.payment.payment_method} (${o.payment.payment_status})` : 'Payment: Pending';
-      const shipmentInfo = o.shipment ? `Shipment: ${o.shipment.carrier} - ${o.shipment.tracking_number} (${o.shipment.shipment_status})` : 'Shipment: Processing';
+      const itemsRowsHtml = o.items.map(i => `
+        <tr>
+          <td><strong>${i.product_name}</strong></td>
+          <td>x${i.quantity}</td>
+          <td>${formatCurrency(i.unit_price)}</td>
+          <td style="font-weight:700;">${formatCurrency(i.item_total)}</td>
+        </tr>
+      `).join('');
 
-      alert(`Order Header #${o.order_id}\nCustomer: ${o.customer_name} (${o.customer_email})\nDate: ${new Date(o.order_date).toLocaleString()}\nStatus: ${o.status}\nTotal: ${formatCurrency(o.total_amount)}\n\nOrder Items:\n${itemsList}\n\n${paymentInfo}\n${shipmentInfo}`);
+      const paymentBadge = o.payment 
+        ? `<span class="badge badge-success"><i class="fa-solid fa-credit-card"></i> ${o.payment.payment_method} (${o.payment.payment_status})</span>`
+        : `<span class="badge badge-warning">Payment Pending</span>`;
+
+      const shipmentBadge = o.shipment
+        ? `<span class="badge badge-info"><i class="fa-solid fa-truck-fast"></i> ${o.shipment.carrier} - ${o.shipment.tracking_number} (${o.shipment.shipment_status})</span>`
+        : `<span class="badge badge-info"><i class="fa-solid fa-box"></i> Order Processing</span>`;
+
+      const content = document.getElementById('order-details-content');
+      content.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div>
+              <h3 style="font-size:17px; font-weight:800;">Order #${o.order_id}</h3>
+              <small style="color:var(--text-muted);">${new Date(o.order_date).toLocaleString()}</small>
+            </div>
+            <span class="badge badge-success">${o.status}</span>
+          </div>
+
+          <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:12px; margin-bottom:14px;">
+            <strong style="font-size:13.5px;">Customer: ${o.customer_name}</strong>
+            <p style="font-size:12px; color:var(--text-secondary);">${o.customer_email}</p>
+          </div>
+
+          <h4 style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); margin-bottom:8px;">Line Items Summary</h4>
+          <div class="table-responsive" style="margin-bottom:14px;">
+            <table class="data-table" style="font-size:12.5px;">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty</th>
+                  <th>Unit Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsRowsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--accent-yellow-light); border:1px solid rgba(245, 158, 11, 0.4); border-radius:var(--radius-md); padding:12px 16px; margin-bottom:14px;">
+            <span style="font-weight:700; color:var(--accent-yellow-dark);">Grand Total Amount</span>
+            <strong style="font-size:18px; color:var(--accent-yellow-dark);">${formatCurrency(o.total_amount)}</strong>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            ${paymentBadge}
+            ${shipmentBadge}
+          </div>
+        </div>
+      `;
+
+      openModal('modal-order-details');
     }
   } catch (e) {
     showToast('Failed to fetch order details', 'error');
@@ -369,7 +471,7 @@ async function loadCustomers() {
           <td><strong>${c.customer_name}</strong></td>
           <td>${c.email}</td>
           <td><strong>${c.total_orders}</strong> orders</td>
-          <td style="color: var(--success); font-weight:700;">${formatCurrency(c.total_spent)}</td>
+          <td style="color: var(--accent-yellow-dark); font-weight:700;">${formatCurrency(c.total_spent)}</td>
         </tr>
       `).join('');
     } else {
@@ -394,7 +496,7 @@ async function loadReviews() {
         const prodJson = await prodRes.json();
         if (prodJson.success && prodJson.data.reviews.length > 0) {
           reviewsHtml += prodJson.data.reviews.map(r => `
-            <div style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin-bottom:12px;">
+            <div style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; margin-bottom:12px; box-shadow:var(--shadow-sm);">
               <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <strong>${r.reviewer_name} on ${prod.product_name}</strong>
                 <span style="color:var(--warning); font-weight:700;">⭐ ${r.rating}/5</span>
