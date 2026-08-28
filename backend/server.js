@@ -32,22 +32,15 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Fallback to Dashboard SPA for non-API routes
-app.get('{*path}', (req, res, next) => {
-  if (req.originalUrl.startsWith('/api')) {
-    return next();
+// SPA & 404 Fallback Middleware
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error: { message: `Route '${req.originalUrl || req.url}' not found on server.` }
+    });
   }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// 404 Route Handler for unhandled API routes
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: {
-      message: `Route '${req.originalUrl}' not found on server.`
-    }
-  });
 });
 
 // Global Error Middleware
