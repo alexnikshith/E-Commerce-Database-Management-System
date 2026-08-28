@@ -32,6 +32,11 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Dedicated Portal Routes
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // SPA & 404 Fallback Middleware
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
@@ -39,6 +44,9 @@ app.use((req, res, next) => {
       success: false,
       error: { message: `Route '${req.originalUrl || req.url}' not found on server.` }
     });
+  }
+  if (req.path.startsWith('/admin')) {
+    return res.sendFile(path.join(__dirname, 'public', 'admin.html'));
   }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-Commerce DBMS - Admin & Management Dashboard</title>
+  <title>E-Commerce Store - Premium Shopping</title>
 
   <!-- Google Fonts & FontAwesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,321 +11,135 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Dashboard Stylesheet -->
-  <link rel="stylesheet" href="/css/dashboard.css">
+  <!-- Storefront Stylesheet -->
+  <link rel="stylesheet" href="/css/storefront.css">
 </head>
 <body>
 
-  <div id="app-container">
+  <!-- Top Header Navigation Bar -->
+  <header class="store-header">
+    <a href="/" class="store-brand">
+      <div class="store-logo-icon">
+        <i class="fa-solid fa-bag-shopping"></i>
+      </div>
+      <span class="store-brand-name">E-Commerce Store</span>
+    </a>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="brand-header">
-        <div class="brand-icon">
-          <i class="fa-solid fa-server"></i>
-        </div>
-        <div>
-          <div class="brand-title">E-Commerce DBMS</div>
-          <div class="brand-subtitle">MySQL 8.0 Engine</div>
+    <nav class="store-nav">
+      <a class="store-nav-link active" id="nav-catalog">
+        <i class="fa-solid fa-store"></i> Shop Catalog
+      </a>
+      <a class="store-nav-link" id="nav-my-orders">
+        <i class="fa-solid fa-receipt"></i> Track My Orders
+      </a>
+      <a class="store-nav-link" id="btn-open-review-modal">
+        <i class="fa-solid fa-star"></i> Write Review
+      </a>
+      <button class="btn btn-details" id="btn-open-user-modal" style="flex:none; padding: 8px 14px;">
+        <i class="fa-solid fa-user-plus"></i> Sign Up / Register
+      </button>
+      <a href="/admin" class="admin-link-btn" title="Open Store Management Portal">
+        <i class="fa-solid fa-user-shield"></i> Admin Access
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <h1 class="hero-title">Discover Premium Products</h1>
+    <p class="hero-subtitle">Explore top electronics, fashion, textbooks, and home appliances with real-time stock availability and instant checkout.</p>
+
+    <!-- Category Filter Pills -->
+    <div class="category-pills" id="category-pills-container">
+      <button class="pill-btn active" data-category="all">All Products</button>
+      <button class="pill-btn" data-category="1">Electronics</button>
+      <button class="pill-btn" data-category="2">Clothing</button>
+      <button class="pill-btn" data-category="3">Books</button>
+      <button class="pill-btn" data-category="4">Home Appliances</button>
+      <button class="pill-btn" data-category="5">Sports</button>
+    </div>
+  </section>
+
+  <!-- Store Main Showcase Container -->
+  <main class="store-container">
+    
+    <!-- View 1: Product Showcase Grid -->
+    <div id="view-catalog">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
+        <h2 style="font-size:22px; font-weight:800; color:var(--text-main);">Available Products</h2>
+        
+        <div style="position:relative; width:280px;">
+          <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+          <input type="text" id="store-search-input" class="form-control" placeholder="Search catalog..." style="padding-left:38px;">
         </div>
       </div>
 
-      <nav class="nav-menu">
-        <a class="nav-item active" data-tab="overview">
-          <i class="fa-solid fa-chart-pie"></i> Overview Dashboard
-        </a>
-        <a class="nav-item" data-tab="products">
-          <i class="fa-solid fa-box-archive"></i> Product Catalog
-        </a>
-        <a class="nav-item" data-tab="orders">
-          <i class="fa-solid fa-receipt"></i> Orders & Checkout
-        </a>
-        <a class="nav-item" data-tab="inventory">
-          <i class="fa-solid fa-warehouse"></i> Inventory & Alerts
-        </a>
-        <a class="nav-item" data-tab="customers">
-          <i class="fa-solid fa-users"></i> Customers Leaderboard
-        </a>
-        <a class="nav-item" data-tab="reviews">
-          <i class="fa-solid fa-star"></i> Reviews & Ratings
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="db-badge">
-          <div class="pulse-dot"></div>
-          <span id="db-status-label">MySQL Connected</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <div class="main-wrapper">
-
-      <!-- Top Header Bar -->
-      <header class="top-header">
-        <div class="header-title">
-          <h1 id="page-heading">Overview Dashboard</h1>
-        </div>
-
-        <div class="header-actions">
-          <button class="btn btn-secondary" id="btn-open-user-modal">
-            <i class="fa-solid fa-user-plus"></i> New Customer
-          </button>
-          <button class="btn btn-secondary" id="btn-open-product-modal">
-            <i class="fa-solid fa-plus"></i> Add Product
-          </button>
-          <button class="btn btn-primary" id="btn-open-order-modal">
-            <i class="fa-solid fa-cart-plus"></i> Create Order / Checkout
-          </button>
-        </div>
-      </header>
-
-      <div class="content-area">
-
-        <!-- KPI Summary Cards Grid -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-header">
-              <span class="kpi-title">Total Platform Revenue</span>
-              <div class="kpi-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
-            </div>
-            <div class="kpi-value" id="kpi-revenue">₹0.00</div>
-          </div>
-
-          <div class="kpi-card success">
-            <div class="kpi-header">
-              <span class="kpi-title">Total Orders</span>
-              <div class="kpi-icon"><i class="fa-solid fa-bag-shopping"></i></div>
-            </div>
-            <div class="kpi-value" id="kpi-orders">0</div>
-          </div>
-
-          <div class="kpi-card">
-            <div class="kpi-header">
-              <span class="kpi-title">Catalog Products</span>
-              <div class="kpi-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-            </div>
-            <div class="kpi-value" id="kpi-products">0</div>
-          </div>
-
-          <div class="kpi-card warning">
-            <div class="kpi-header">
-              <span class="kpi-title">Registered Customers</span>
-              <div class="kpi-icon"><i class="fa-solid fa-user-group"></i></div>
-            </div>
-            <div class="kpi-value" id="kpi-customers">0</div>
-          </div>
-
-          <div class="kpi-card danger">
-            <div class="kpi-header">
-              <span class="kpi-title">Low Stock Alerts</span>
-              <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            </div>
-            <div class="kpi-value" id="kpi-low-stock">0</div>
-          </div>
-        </div>
-
-        <!-- Tab 1: Overview -->
-        <section id="tab-overview" class="tab-content active">
-          <div class="dashboard-grid">
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title"><i class="fa-solid fa-trophy"></i> Top Performing Products</div>
-              </div>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Units Sold</th>
-                      <th>Total Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody id="overview-top-products-body">
-                    <tr><td colspan="5" style="text-align:center;">Loading analytics...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title"><i class="fa-solid fa-chart-column"></i> Category Revenue</div>
-              </div>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody id="overview-category-body">
-                    <tr><td colspan="2" style="text-align:center;">Loading analytics...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 2: Product Catalog -->
-        <section id="tab-products" class="tab-content">
-          <div class="card">
-            <div class="filter-bar">
-              <div class="search-wrapper">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="product-search-input" class="search-input" placeholder="Search products or brand...">
-              </div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Brand</th>
-                    <th>Price</th>
-                    <th>Stock Quantity</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="products-table-body">
-                  <tr><td colspan="7" style="text-align:center;">Loading products...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 3: Orders & Checkout -->
-        <section id="tab-orders" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Purchase Orders History</div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Date</th>
-                    <th>Items</th>
-                    <th>Status</th>
-                    <th>Total Amount</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="orders-table-body">
-                  <tr><td colspan="7" style="text-align:center;">Loading orders...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 4: Inventory -->
-        <section id="tab-inventory" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-boxes-packing"></i> Inventory Levels & Reorder Monitor</div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Inventory ID</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Price</th>
-                    <th>Available Stock</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="inventory-table-body">
-                  <tr><td colspan="6" style="text-align:center;">Loading inventory...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 5: Customers -->
-        <section id="tab-customers" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-ranking-star"></i> Customer Spending Leaderboard</div>
-            </div>
-            <div class="table-responsive">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>User ID</th>
-                    <th>Customer Name</th>
-                    <th>Email</th>
-                    <th>Orders Placed</th>
-                    <th>Total Amount Spent</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="customers-table-body">
-                  <tr><td colspan="5" style="text-align:center;">Loading customers...</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <!-- Tab 6: Reviews -->
-        <section id="tab-reviews" class="tab-content">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><i class="fa-solid fa-comments"></i> Product Reviews & Customer Feedback</div>
-              <button class="btn btn-secondary" id="btn-open-review-modal">
-                <i class="fa-solid fa-pen-to-square"></i> Write Review
-              </button>
-            </div>
-            <div id="reviews-container" class="reviews-grid">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-        </section>
-
+      <div class="product-grid" id="store-product-grid">
+        <!-- Rendered via store.js -->
+        <p style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">Loading products...</p>
       </div>
     </div>
-  </div>
 
-  <!-- MODAL 1: Create Order / Checkout -->
-  <div class="modal-overlay" id="modal-order">
+    <!-- View 2: Track Customer Orders -->
+    <div id="view-my-orders" style="display:none;">
+      <div style="background:#ffffff; border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-card);">
+        <h2 style="font-size:22px; font-weight:800; margin-bottom:12px;"><i class="fa-solid fa-receipt" style="color:var(--accent-amber);"></i> Track Customer Orders</h2>
+        <p style="font-size:14px; color:var(--text-secondary); margin-bottom:24px;">Select your customer profile to view your purchase order history.</p>
+
+        <div class="form-group" style="max-width:400px; margin-bottom:24px;">
+          <label class="form-label">Select Customer Profile</label>
+          <select id="my-orders-user-select" class="form-control"></select>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" style="width:100%;">
+            <thead>
+              <tr style="background:#f8fafc;">
+                <th style="padding:12px 16px;">Order ID</th>
+                <th style="padding:12px 16px;">Order Date</th>
+                <th style="padding:12px 16px;">Status</th>
+                <th style="padding:12px 16px;">Total Amount</th>
+                <th style="padding:12px 16px;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="my-orders-table-body">
+              <tr><td colspan="5" style="text-align:center; padding:24px;">Select a customer profile above to view order history.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: Buy Now / Order Checkout -->
+  <div class="modal-overlay" id="modal-checkout">
     <div class="modal">
       <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-cart-shopping"></i> Create Order / Transaction Checkout</div>
+        <div class="modal-title"><i class="fa-solid fa-cart-shopping"></i> Checkout Order</div>
         <button class="close-btn">&times;</button>
       </div>
-      <form id="form-create-order">
+      <form id="form-checkout">
+        <input type="hidden" id="checkout-product-id">
+
         <div class="form-group">
-          <label class="form-label">Select Customer</label>
-          <select id="order-user-select" class="form-control" required></select>
+          <label class="form-label">Product Name</label>
+          <input type="text" id="checkout-product-name" class="form-control" readonly style="font-weight:700; background:#f1f5f9;">
         </div>
 
         <div class="form-group">
-          <label class="form-label">Select Product</label>
-          <select id="order-product-select" class="form-control" required></select>
+          <label class="form-label">Select Customer Profile</label>
+          <select id="checkout-user-select" class="form-control" required></select>
         </div>
 
         <div class="form-group">
           <label class="form-label">Quantity</label>
-          <input type="number" id="order-qty-input" class="form-control" value="1" min="1" required>
+          <input type="number" id="checkout-qty-input" class="form-control" value="1" min="1" required>
         </div>
 
         <div class="form-group">
           <label class="form-label">Payment Method</label>
-          <select id="order-payment-select" class="form-control">
+          <select id="checkout-payment-select" class="form-control">
             <option value="UPI">UPI Payment</option>
             <option value="Credit Card">Credit Card</option>
             <option value="Net Banking">Net Banking</option>
@@ -333,50 +147,14 @@
           </select>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
-          <i class="fa-solid fa-check"></i> Place Order (Runs Transaction & Triggers)
+        <button type="submit" class="btn btn-buy" style="width: 100%; margin-top: 12px;">
+          <i class="fa-solid fa-check"></i> Place Order Now
         </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 2: Add Product -->
-  <div class="modal-overlay" id="modal-product">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-box-archive"></i> Add New Product</div>
-        <button class="close-btn">&times;</button>
-      </div>
-      <form id="form-create-product">
-        <div class="form-group">
-          <label class="form-label">Category</label>
-          <select id="product-category-select" class="form-control" required></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Product Name</label>
-          <input type="text" id="product-name-input" class="form-control" placeholder="e.g. Sony WH-1000XM6" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Brand</label>
-          <input type="text" id="product-brand-input" class="form-control" placeholder="e.g. Sony">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Price (₹)</label>
-          <input type="number" id="product-price-input" class="form-control" step="0.01" min="0.01" placeholder="999.00" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Initial Inventory Stock</label>
-          <input type="number" id="product-stock-input" class="form-control" value="50" min="0" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
-          <i class="fa-solid fa-plus"></i> Create Product
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 3: Register User -->
+  <!-- MODAL 2: Register Customer Account -->
   <div class="modal-overlay" id="modal-user">
     <div class="modal">
       <div class="modal-header">
@@ -401,14 +179,14 @@
           <input type="text" id="user-phone-input" class="form-control" placeholder="9876543210">
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
-          <i class="fa-solid fa-user-check"></i> Register Customer
+        <button type="submit" class="btn btn-buy" style="width: 100%; margin-top: 12px;">
+          <i class="fa-solid fa-user-check"></i> Register Account
         </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 4: Write Review -->
+  <!-- MODAL 3: Write Review -->
   <div class="modal-overlay" id="modal-review">
     <div class="modal">
       <div class="modal-header">
@@ -439,14 +217,14 @@
           <textarea id="review-comment-input" class="form-control" rows="3" placeholder="Share product feedback..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
+        <button type="submit" class="btn btn-buy" style="width: 100%; margin-top: 12px;">
           <i class="fa-solid fa-paper-plane"></i> Submit Review
         </button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 5: Custom Product Details Viewer Popup -->
+  <!-- MODAL 4: Custom Product Details Viewer Popup -->
   <div class="modal-overlay" id="modal-product-details">
     <div class="modal" style="max-width: 580px;">
       <div class="modal-header">
@@ -459,7 +237,7 @@
     </div>
   </div>
 
-  <!-- MODAL 6: Custom Order Details Viewer Popup -->
+  <!-- MODAL 5: Custom Order Details Viewer Popup -->
   <div class="modal-overlay" id="modal-order-details">
     <div class="modal" style="max-width: 620px;">
       <div class="modal-header">
@@ -472,56 +250,10 @@
     </div>
   </div>
 
-  <!-- MODAL 7: Custom Delete Confirmation Modal Popup -->
-  <div class="modal-overlay" id="modal-confirm-delete">
-    <div class="modal" style="max-width: 440px;">
-      <div class="modal-header">
-        <div class="modal-title" style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Deletion</div>
-        <button class="close-btn">&times;</button>
-      </div>
-      <div style="margin-bottom:20px;">
-        <p id="delete-confirm-message" style="font-size:14px; color:var(--text-main); margin-bottom:8px;"></p>
-        <p style="font-size:12px; color:var(--text-muted);">This action will permanently delete the record from the MySQL database and cannot be undone.</p>
-      </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button class="btn btn-secondary" onclick="closeModal('modal-confirm-delete')">Cancel</button>
-        <button class="btn btn-primary" id="btn-confirm-delete-submit" style="background:var(--danger); border-color:var(--danger);">
-          <i class="fa-solid fa-trash-can"></i> Permanently Delete
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 8: Custom Update Order Status Modal Popup -->
-  <div class="modal-overlay" id="modal-update-status">
-    <div class="modal" style="max-width: 440px;">
-      <div class="modal-header">
-        <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Order Status</div>
-        <button class="close-btn">&times;</button>
-      </div>
-      <form id="form-update-order-status">
-        <input type="hidden" id="status-target-order-id">
-        <div class="form-group">
-          <label class="form-label">Order Fulfillment Status</label>
-          <select id="order-status-select" class="form-control" required>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Pending">Pending</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;">
-          <i class="fa-solid fa-check"></i> Update Order Status
-        </button>
-      </form>
-    </div>
-  </div>
-
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
-  <!-- App Script -->
-  <script src="/js/app.js"></script>
+  <!-- Store Script -->
+  <script src="/js/store.js"></script>
 </body>
 </html>
