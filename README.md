@@ -6,7 +6,7 @@ An enterprise-grade relational database management system and Node.js REST API s
 
 ### 🌐 Live Production Deployment URLs
 - **🛒 Customer Shopping Storefront**: [https://nicks-ecommerce-db-system.vercel.app](https://nicks-ecommerce-db-system.vercel.app)
-- **⚙️ Admin Management Control Panel**: [https://nicks-ecommerce-db-system.vercel.app/admin](https://nicks-ecommerce-db-system.vercel.app/admin) *(Master Password: `Nikshith123$`)*
+- **⚙️ Admin Management Control Panel**: [https://nicks-ecommerce-db-system.vercel.app/admin](https://nicks-ecommerce-db-system.vercel.app/admin)
 
 ---
 
