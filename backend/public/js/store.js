@@ -2,6 +2,8 @@
  * E-Commerce Customer Storefront - JavaScript SPA Controller
  */
 
+let pendingActionAfterAuth = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   checkCustomerAuth();
   setupNavigation();
@@ -30,6 +32,17 @@ function checkCustomerAuth() {
   if (unloggedDiv) unloggedDiv.style.display = 'flex';
   if (loggedDiv) loggedDiv.style.display = 'none';
   return null;
+}
+
+// Require Customer Auth Wrapper
+function requireCustomerAuth(actionFn) {
+  const loggedUser = checkCustomerAuth();
+  if (loggedUser) {
+    actionFn(loggedUser);
+  } else {
+    pendingActionAfterAuth = actionFn;
+    openModal('modal-auth-required');
+  }
 }
 
 // Currency Formatter (INR ₹)
@@ -69,19 +82,18 @@ function setupNavigation() {
     viewMyOrders.style.display = 'none';
   });
 
-  navMyOrders?.addEventListener('click', async () => {
-    navMyOrders.classList.add('active');
-    navCatalog.classList.remove('active');
-    viewCatalog.style.display = 'none';
-    viewMyOrders.style.display = 'block';
-    await loadCustomerOrdersDropdown();
+  navMyOrders?.addEventListener('click', () => {
+    requireCustomerAuth(async (loggedUser) => {
+      navMyOrders.classList.add('active');
+      navCatalog.classList.remove('active');
+      viewCatalog.style.display = 'none';
+      viewMyOrders.style.display = 'block';
+      await loadCustomerOrdersDropdown();
 
-    const loggedUser = checkCustomerAuth();
-    if (loggedUser) {
       const select = document.getElementById('my-orders-user-select');
       if (select) select.value = loggedUser.user_id;
       loadCustomerOrderHistory(loggedUser.user_id);
-    }
+    });
   });
 
   document.getElementById('my-orders-user-select')?.addEventListener('change', (e) => {
@@ -108,9 +120,22 @@ function setupModals() {
     openModal('modal-user');
   });
 
-  document.getElementById('btn-open-review-modal')?.addEventListener('click', async () => {
-    await populateReviewModalSelects();
-    openModal('modal-review');
+  // Auth Required Gate Buttons
+  document.getElementById('btn-auth-required-login')?.addEventListener('click', () => {
+    closeModal('modal-auth-required');
+    openModal('modal-customer-login');
+  });
+
+  document.getElementById('btn-auth-required-register')?.addEventListener('click', () => {
+    closeModal('modal-auth-required');
+    openModal('modal-user');
+  });
+
+  document.getElementById('btn-open-review-modal')?.addEventListener('click', () => {
+    requireCustomerAuth(async () => {
+      await populateReviewModalSelects();
+      openModal('modal-review');
+    });
   });
 
   document.querySelectorAll('.close-btn').forEach(btn => {
@@ -162,8 +187,14 @@ async function handleCustomerLoginSubmit(e) {
       localStorage.setItem('customer_token', json.token);
       showToast(`Welcome back, ${json.data.name}!`, 'success');
       closeModal('modal-customer-login');
-      checkCustomerAuth();
+      const user = checkCustomerAuth();
       populateCustomerSelects();
+
+      if (typeof pendingActionAfterAuth === 'function') {
+        const action = pendingActionAfterAuth;
+        pendingActionAfterAuth = null;
+        action(user);
+      }
     } else {
       showToast(json.error ? json.error.message : 'Invalid email or password.', 'error');
     }
@@ -229,10 +260,10 @@ function renderProductGrid(products) {
           </div>
 
           <div class="product-actions">
-            <button class="btn btn-details" onclick="viewProductDetails(${p.product_id})">
+            <button class="btn btn-details" onclick="triggerViewDetails(${p.product_id})">
               <i class="fa-solid fa-eye"></i> Details
             </button>
-            <button class="btn btn-buy" onclick="openCheckoutModal(${p.product_id}, '${safeName}')">
+            <button class="btn btn-buy" onclick="triggerBuyNow(${p.product_id}, '${safeName}')">
               <i class="fa-solid fa-cart-shopping"></i> Buy Now
             </button>
           </div>
@@ -240,6 +271,20 @@ function renderProductGrid(products) {
       </div>
     `;
   }).join('');
+}
+
+// Intercept Details Click with Auth Check
+function triggerViewDetails(id) {
+  requireCustomerAuth(() => {
+    viewProductDetails(id);
+  });
+}
+
+// Intercept Buy Now Click with Auth Check
+function triggerBuyNow(productId, productName) {
+  requireCustomerAuth(() => {
+    openCheckoutModal(productId, productName);
+  });
 }
 
 // Category Filter Pills
@@ -447,8 +492,14 @@ async function handleUserSubmit(e) {
       localStorage.setItem('customer_user', JSON.stringify(json.data));
       localStorage.setItem('customer_token', `customer-token-${json.data.user_id}`);
       closeModal('modal-user');
-      checkCustomerAuth();
+      const user = checkCustomerAuth();
       populateCustomerSelects();
+
+      if (typeof pendingActionAfterAuth === 'function') {
+        const action = pendingActionAfterAuth;
+        pendingActionAfterAuth = null;
+        action(user);
+      }
     } else {
       showToast(json.error ? json.error.message : 'Failed to register customer.', 'error');
     }

@@ -296,6 +296,25 @@
     </div>
   </div>
 
+  <!-- MODAL 6: Authentication Required Gate Popup Modal -->
+  <div class="modal-overlay" id="modal-auth-required">
+    <div class="modal" style="max-width: 440px; text-align: center;">
+      <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #f59e0b, #eab308); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #ffffff; margin-bottom: 16px;">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 6px;">Log In or Register to Proceed</h2>
+      <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px;">Please log in to your customer account or create a new account to buy products, view details, track orders, or submit reviews.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-buy" id="btn-auth-required-login">
+          <i class="fa-solid fa-right-to-bracket"></i> Log In to Existing Account
+        </button>
+        <button class="btn btn-details" id="btn-auth-required-register">
+          <i class="fa-solid fa-user-plus"></i> Create New Customer Account
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
 
