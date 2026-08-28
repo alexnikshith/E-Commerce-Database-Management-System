@@ -13,6 +13,7 @@ const getProducts = async (req, res, next) => {
         p.description,
         p.price,
         p.brand,
+        p.image_url,
         p.created_at,
         c.category_id,
         c.category_name,
@@ -57,6 +58,7 @@ const getProductById = async (req, res, next) => {
         p.description,
         p.price,
         p.brand,
+        p.image_url,
         p.created_at,
         c.category_id,
         c.category_name,
@@ -114,14 +116,14 @@ const getProductById = async (req, res, next) => {
 const createProduct = async (req, res, next) => {
   const connection = await pool.getConnection();
   try {
-    const { category_id, product_name, description, price, brand, initial_stock } = req.body;
+    const { category_id, product_name, description, price, brand, image_url, initial_stock } = req.body;
 
     const catId = parseInt(category_id, 10);
     if (isNaN(catId) || catId <= 0) {
       connection.release();
       return res.status(400).json({
         success: false,
-        error: { message: 'Valid category_id (positive integer) is required.' }
+        error: { message: 'category_id is required and must be a positive integer.' }
       });
     }
 
@@ -168,8 +170,8 @@ const createProduct = async (req, res, next) => {
     await connection.beginTransaction();
 
     const productInsert = `
-      INSERT INTO products (category_id, product_name, description, price, brand)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO products (category_id, product_name, description, price, brand, image_url)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     const [prodResult] = await connection.execute(productInsert, [
@@ -177,7 +179,8 @@ const createProduct = async (req, res, next) => {
       product_name.trim(),
       description ? description.trim() : null,
       numPrice,
-      brand ? brand.trim() : null
+      brand ? brand.trim() : null,
+      image_url ? image_url.trim() : null
     ]);
 
     const newProductId = prodResult.insertId;
@@ -192,7 +195,7 @@ const createProduct = async (req, res, next) => {
     connection.release();
 
     const [newProduct] = await pool.execute(
-      `SELECT p.product_id, p.product_name, p.description, p.price, p.brand, p.created_at, c.category_name, i.quantity AS stock_quantity
+      `SELECT p.product_id, p.product_name, p.description, p.price, p.brand, p.image_url, p.created_at, c.category_name, i.quantity AS stock_quantity
        FROM products p
        JOIN categories c ON p.category_id = c.category_id
        JOIN inventory i ON p.product_id = i.product_id

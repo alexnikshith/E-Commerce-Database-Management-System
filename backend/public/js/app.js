@@ -801,6 +801,7 @@ async function handleProductSubmit(e) {
   const brand = document.getElementById('product-brand-input').value;
   const price = document.getElementById('product-price-input').value;
   const stock = document.getElementById('product-stock-input').value;
+  const imageUrl = document.getElementById('product-image-input')?.value;
 
   try {
     const res = await fetch('/api/products', {
@@ -811,7 +812,8 @@ async function handleProductSubmit(e) {
         product_name: name,
         brand: brand,
         price: price,
-        initial_stock: stock
+        initial_stock: stock,
+        image_url: imageUrl
       })
     });
 

@@ -243,9 +243,13 @@ function renderProductGrid(products) {
       : `<span class="product-stock">${p.stock_quantity} available</span>`;
 
     const safeName = p.product_name.replace(/'/g, "\\'");
+    const imgHtml = p.image_url 
+      ? `<div class="product-card-image"><img src="${p.image_url}" alt="${safeName}" onerror="this.src='/images/iphone17.jpg'"></div>`
+      : `<div class="product-card-image" style="background:#fef3c7; color:#b45309; font-size:36px;"><i class="fa-solid fa-box-open"></i></div>`;
 
     return `
       <div class="product-card">
+        ${imgHtml}
         <div class="product-card-body">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
             <span class="product-brand">${p.brand || 'Featured Brand'}</span>
@@ -344,8 +348,11 @@ async function viewProductDetails(id) {
         : '<p style="font-size:13px; color:var(--text-muted); font-style:italic;">No reviews written yet.</p>';
 
       const content = document.getElementById('product-details-content');
+      const imgDetail = p.image_url ? `<img src="${p.image_url}" style="width:100%; max-height:220px; object-fit:cover; border-radius:12px; margin-bottom:14px; border:1px solid var(--border-color);" alt="${p.product_name}">` : '';
+
       content.innerHTML = `
         <div style="margin-bottom:16px;">
+          ${imgDetail}
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <h3 style="font-size:18px; font-weight:800;">${p.product_name}</h3>
             <span style="font-size:11px; font-weight:700; background:var(--accent-yellow-light); color:var(--accent-yellow-dark); padding:4px 10px; border-radius:20px;">${p.category_name}</span>

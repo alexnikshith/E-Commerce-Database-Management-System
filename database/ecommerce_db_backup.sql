@@ -349,6 +349,7 @@ CREATE TABLE `products` (
   `description` varchar(500) DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
   `brand` varchar(100) DEFAULT NULL,
+  `image_url` varchar(500) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_id`),
   KEY `category_id` (`category_id`),
@@ -363,7 +364,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,1,'iPhone 17','Latest Apple smartphone',79999.00,'Apple','2026-08-27 06:52:00'),(2,1,'Galaxy S26','Samsung flagship smartphone',74999.00,'Samsung','2026-08-27 06:52:00'),(3,1,'WH-1000XM6 Headphones','Wireless noise cancelling headphones',34999.00,'Sony','2026-08-27 06:52:00'),(4,2,'Classic Cotton T-Shirt','Comfortable cotton t-shirt',999.00,'Puma','2026-08-27 06:52:00'),(5,2,'Running Shoes','Lightweight running shoes',4999.00,'Nike','2026-08-27 06:52:00'),(6,3,'Clean Code','Programming best practices book',899.00,'Robert C. Martin','2026-08-27 06:52:00'),(7,3,'Database System Concepts','Database management textbook',1299.00,'McGraw Hill','2026-08-27 06:52:00'),(8,4,'Air Fryer','Digital air fryer for home cooking',5999.00,'Philips','2026-08-27 06:52:00'),(9,4,'Mixer Grinder','Multi-speed kitchen mixer grinder',3499.00,'Prestige','2026-08-27 06:52:00'),(10,5,'Football','Professional size football',1499.00,'Adidas','2026-08-27 06:52:00');
+INSERT INTO `products` VALUES (1,1,'iPhone 17','Latest Apple smartphone',79999.00,'Apple','/images/iphone17.jpg','2026-08-27 06:52:00'),(2,1,'Galaxy S26','Samsung flagship smartphone',74999.00,'Samsung','/images/galaxys26.jpg','2026-08-27 06:52:00'),(3,1,'WH-1000XM6 Headphones','Wireless noise cancelling headphones',34999.00,'Sony','/images/sony_headphones.jpg','2026-08-27 06:52:00'),(4,2,'Classic Cotton T-Shirt','Comfortable cotton t-shirt',999.00,'Puma','/images/cotton_tshirt.jpg','2026-08-27 06:52:00'),(5,2,'Running Shoes','Lightweight running shoes',4999.00,'Nike','/images/running_shoes.jpg','2026-08-27 06:52:00'),(6,3,'Clean Code','Programming best practices book',899.00,'Robert C. Martin','/images/clean_code.jpg','2026-08-27 06:52:00'),(7,3,'Database System Concepts','Database management textbook',1299.00,'McGraw Hill','/images/db_concepts.jpg','2026-08-27 06:52:00'),(8,4,'Air Fryer','Digital air fryer for home cooking',5999.00,'Philips','/images/air_fryer.jpg','2026-08-27 06:52:00'),(9,4,'Mixer Grinder','Multi-speed kitchen mixer grinder',3499.00,'Prestige',NULL,'2026-08-27 06:52:00'),(10,5,'Football','Professional size football',1499.00,'Adidas',NULL,'2026-08-27 06:52:00');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
