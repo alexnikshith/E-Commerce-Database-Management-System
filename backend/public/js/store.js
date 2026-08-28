@@ -3,11 +3,34 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  checkCustomerAuth();
   setupNavigation();
   setupModals();
   loadProducts();
   populateCustomerSelects();
 });
+
+// Customer Session State
+function checkCustomerAuth() {
+  const userJson = localStorage.getItem('customer_user');
+  const unloggedDiv = document.getElementById('auth-unlogged-actions');
+  const loggedDiv = document.getElementById('auth-logged-actions');
+  const nameSpan = document.getElementById('logged-customer-name');
+
+  if (userJson) {
+    try {
+      const user = JSON.parse(userJson);
+      if (unloggedDiv) unloggedDiv.style.display = 'none';
+      if (loggedDiv) loggedDiv.style.display = 'flex';
+      if (nameSpan) nameSpan.innerHTML = `<i class="fa-solid fa-user-check"></i> Hi, ${user.name}`;
+      return user;
+    } catch (e) {}
+  }
+
+  if (unloggedDiv) unloggedDiv.style.display = 'flex';
+  if (loggedDiv) loggedDiv.style.display = 'none';
+  return null;
+}
 
 // Currency Formatter (INR ₹)
 function formatCurrency(amount) {
@@ -46,12 +69,19 @@ function setupNavigation() {
     viewMyOrders.style.display = 'none';
   });
 
-  navMyOrders?.addEventListener('click', () => {
+  navMyOrders?.addEventListener('click', async () => {
     navMyOrders.classList.add('active');
     navCatalog.classList.remove('active');
     viewCatalog.style.display = 'none';
     viewMyOrders.style.display = 'block';
-    loadCustomerOrdersDropdown();
+    await loadCustomerOrdersDropdown();
+
+    const loggedUser = checkCustomerAuth();
+    if (loggedUser) {
+      const select = document.getElementById('my-orders-user-select');
+      if (select) select.value = loggedUser.user_id;
+      loadCustomerOrderHistory(loggedUser.user_id);
+    }
   });
 
   document.getElementById('my-orders-user-select')?.addEventListener('change', (e) => {
@@ -64,7 +94,17 @@ function setupNavigation() {
 function setupModals() {
   const modalOverlays = document.querySelectorAll('.modal-overlay');
 
+  document.getElementById('btn-open-customer-login-modal')?.addEventListener('click', () => {
+    openModal('modal-customer-login');
+  });
+
   document.getElementById('btn-open-user-modal')?.addEventListener('click', () => {
+    openModal('modal-user');
+  });
+
+  document.getElementById('link-switch-to-register')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal('modal-customer-login');
     openModal('modal-user');
   });
 
@@ -89,9 +129,47 @@ function setupModals() {
   });
 
   // Submit Forms
+  document.getElementById('form-customer-login')?.addEventListener('submit', handleCustomerLoginSubmit);
   document.getElementById('form-checkout')?.addEventListener('submit', handleCheckoutSubmit);
   document.getElementById('form-create-user')?.addEventListener('submit', handleUserSubmit);
   document.getElementById('form-create-review')?.addEventListener('submit', handleReviewSubmit);
+
+  // Logout Button
+  document.getElementById('btn-customer-logout')?.addEventListener('click', () => {
+    localStorage.removeItem('customer_user');
+    localStorage.removeItem('customer_token');
+    checkCustomerAuth();
+    showToast('Logged out cleanly.', 'success');
+  });
+}
+
+// Handle Customer Login Form Submit
+async function handleCustomerLoginSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email-input').value;
+  const password = document.getElementById('login-password-input').value;
+
+  try {
+    const res = await fetch('/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const json = await res.json();
+    if (res.ok && json.success) {
+      localStorage.setItem('customer_user', JSON.stringify(json.data));
+      localStorage.setItem('customer_token', json.token);
+      showToast(`Welcome back, ${json.data.name}!`, 'success');
+      closeModal('modal-customer-login');
+      checkCustomerAuth();
+      populateCustomerSelects();
+    } else {
+      showToast(json.error ? json.error.message : 'Invalid email or password.', 'error');
+    }
+  } catch (err) {
+    showToast('Login failed', 'error');
+  }
 }
 
 function openModal(id) {
@@ -267,6 +345,13 @@ async function openCheckoutModal(productId, productName) {
   document.getElementById('checkout-product-id').value = productId;
   document.getElementById('checkout-product-name').value = productName;
   await populateCustomerSelects();
+
+  const loggedUser = checkCustomerAuth();
+  if (loggedUser) {
+    const select = document.getElementById('checkout-user-select');
+    if (select) select.value = loggedUser.user_id;
+  }
+
   openModal('modal-checkout');
 }
 
@@ -299,6 +384,8 @@ async function populateReviewModalSelects() {
 
     if (userJson.success) {
       userSelect.innerHTML = userJson.data.map(u => `<option value="${u.user_id}">${u.customer_name}</option>`).join('');
+      const loggedUser = checkCustomerAuth();
+      if (loggedUser && userSelect) userSelect.value = loggedUser.user_id;
     }
 
     if (prodJson.success) {
@@ -339,7 +426,7 @@ async function handleCheckoutSubmit(e) {
   }
 }
 
-// Handle User Submit
+// Handle User Registration Submit
 async function handleUserSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('user-name-input').value;
@@ -356,8 +443,11 @@ async function handleUserSubmit(e) {
 
     const json = await res.json();
     if (res.ok && json.success) {
-      showToast(`Customer account '${json.data.name}' created!`, 'success');
+      showToast(`Account '${json.data.name}' registered! Logged in automatically.`, 'success');
+      localStorage.setItem('customer_user', JSON.stringify(json.data));
+      localStorage.setItem('customer_token', `customer-token-${json.data.user_id}`);
       closeModal('modal-user');
+      checkCustomerAuth();
       populateCustomerSelects();
     } else {
       showToast(json.error ? json.error.message : 'Failed to register customer.', 'error');

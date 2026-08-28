@@ -35,9 +35,27 @@
       <a class="store-nav-link" id="btn-open-review-modal">
         <i class="fa-solid fa-star"></i> Write Review
       </a>
-      <button class="btn btn-details" id="btn-open-user-modal" style="flex:none; padding: 8px 14px;">
-        <i class="fa-solid fa-user-plus"></i> Sign Up / Register
-      </button>
+
+      <!-- Unauthenticated Customer State -->
+      <div id="auth-unlogged-actions" style="display:flex; gap:10px; align-items:center;">
+        <button class="btn btn-details" id="btn-open-customer-login-modal" style="flex:none; padding: 8px 14px;">
+          <i class="fa-solid fa-right-to-bracket"></i> Log In
+        </button>
+        <button class="btn btn-buy" id="btn-open-user-modal" style="flex:none; padding: 8px 14px;">
+          <i class="fa-solid fa-user-plus"></i> Sign Up
+        </button>
+      </div>
+
+      <!-- Authenticated Customer State -->
+      <div id="auth-logged-actions" style="display:none; gap:10px; align-items:center;">
+        <span id="logged-customer-name" style="font-size:13px; font-weight:800; color:var(--accent-yellow-dark); background:var(--accent-yellow-light); padding:6px 12px; border-radius:20px;">
+          <i class="fa-solid fa-user-check"></i> Hi, Customer
+        </span>
+        <button class="btn btn-details" id="btn-customer-logout" style="flex:none; padding: 6px 12px; font-size:12px; color:var(--danger);">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+
       <a href="/admin" class="admin-link-btn" title="Open Store Management Portal">
         <i class="fa-solid fa-user-shield"></i> Admin Access
       </a>
@@ -247,6 +265,34 @@
       <div id="order-details-content">
         <!-- Rendered via JS -->
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL 0: Customer Login Popup Modal -->
+  <div class="modal-overlay" id="modal-customer-login">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-right-to-bracket"></i> Customer Log In</div>
+        <button class="close-btn">&times;</button>
+      </div>
+      <form id="form-customer-login">
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="login-email-input" class="form-control" placeholder="rahul@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password-input" class="form-control" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" class="btn btn-buy" style="width: 100%; margin-top: 12px;">
+          <i class="fa-solid fa-key"></i> Log In to Store
+        </button>
+
+        <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:16px;">
+          Don't have an account? <a href="#" id="link-switch-to-register" style="color:var(--accent-yellow-dark); font-weight:700;">Sign Up Here</a>
+        </p>
+      </form>
     </div>
   </div>
 

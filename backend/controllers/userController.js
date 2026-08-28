@@ -185,8 +185,63 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/users/login
+ * Customer Login with email & password validation
+ */
+const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Email and password are required.' }
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+
+    const [users] = await pool.execute(
+      'SELECT user_id, name, email, phone, password_hash, created_at FROM users WHERE email = ?',
+      [cleanEmail]
+    );
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid email or password.' }
+      });
+    }
+
+    const user = users[0];
+    if (user.password_hash !== passwordHash) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid email or password.' }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Customer login successful.',
+      data: {
+        user_id: user.user_id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone
+      },
+      token: `customer-token-${user.user_id}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUserOrders,
   createUser,
-  deleteUser
+  deleteUser,
+  loginUser
 };
