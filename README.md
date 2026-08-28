@@ -4,6 +4,12 @@ An enterprise-grade relational database management system and Node.js REST API s
 
 ---
 
+### 🌐 Live Production Deployment URLs
+- **🛒 Customer Shopping Storefront**: [https://nicks-ecommerce-db-system.vercel.app](https://nicks-ecommerce-db-system.vercel.app)
+- **⚙️ Admin Management Control Panel**: [https://nicks-ecommerce-db-system.vercel.app/admin](https://nicks-ecommerce-db-system.vercel.app/admin) *(Master Password: `Nikshith123$`)*
+
+---
+
 ## 1. Project Overview
 This project delivers a complete database-backed RESTful backend architecture for an e-commerce platform. It manages user accounts, user addresses, category taxonomies, product catalogs, inventory stock, shopping carts, purchase orders, order line items, payments, shipment tracking, and product reviews. The system incorporates database-level business logic (triggers, stored procedures, deterministic functions, and views) combined with an Express.js API layer featuring ACID-compliant transactions and parameterized SQL queries.
 
