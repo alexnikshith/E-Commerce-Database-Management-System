@@ -254,6 +254,32 @@ const getOrdersByStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/admin/login
+ * Verify admin authentication password
+ */
+const verifyAdminPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const expectedPassword = process.env.ADMIN_PASSWORD || 'Nikshith123$';
+
+    if (!password || password !== expectedPassword) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid Admin password. Access denied.' }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Admin authentication successful.',
+      token: 'admin-auth-token-nikshith123'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getDashboardSummary,
   getRevenueReport,
@@ -261,5 +287,6 @@ module.exports = {
   getCustomerAnalytics,
   getLowStockReport,
   getCategoryPerformance,
-  getOrdersByStatus
+  getOrdersByStatus,
+  verifyAdminPassword
 };

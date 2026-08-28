@@ -7,9 +7,11 @@ const {
   getCustomerAnalytics,
   getLowStockReport,
   getCategoryPerformance,
-  getOrdersByStatus
+  getOrdersByStatus,
+  verifyAdminPassword
 } = require('../controllers/adminController');
 
+router.post('/login', verifyAdminPassword);
 router.get('/dashboard', getDashboardSummary);
 router.get('/revenue', getRevenueReport);
 router.get('/top-products', getTopProducts);

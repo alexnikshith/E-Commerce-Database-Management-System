@@ -5,6 +5,9 @@
 let pendingDeleteAction = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Admin Password Gate Verification
+  checkAdminAuth();
+
   // Navigation Tabs Logic
   const navItems = document.querySelectorAll('.nav-item');
   const tabContents = document.querySelectorAll('.tab-content');
@@ -28,12 +31,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Modals Controller
   setupModals();
-
-  // Initial Load
-  loadDashboardKPIs();
-  loadOverviewAnalytics();
-  loadProducts();
 });
+
+// Admin Password Gate Check
+function checkAdminAuth() {
+  const token = localStorage.getItem('admin_token');
+  const loginModal = document.getElementById('modal-admin-login');
+
+  if (token === 'admin-auth-token-nikshith123') {
+    if (loginModal) loginModal.classList.remove('active');
+    loadDashboardKPIs();
+    loadOverviewAnalytics();
+    loadProducts();
+  } else {
+    if (loginModal) loginModal.classList.add('active');
+  }
+}
 
 // Currency Formatter (INR ₹)
 function formatCurrency(amount) {
@@ -84,24 +97,34 @@ function setupModals() {
   document.querySelectorAll('.close-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const overlay = e.target.closest('.modal-overlay');
-      closeModal(overlay.id);
+      if (overlay.id !== 'modal-admin-login') {
+        closeModal(overlay.id);
+      }
     });
   });
 
   modalOverlays.forEach(overlay => {
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) {
+      if (e.target === overlay && overlay.id !== 'modal-admin-login') {
         closeModal(overlay.id);
       }
     });
   });
 
   // Submit Forms
+  document.getElementById('form-admin-login')?.addEventListener('submit', handleAdminLoginSubmit);
   document.getElementById('form-create-order')?.addEventListener('submit', handleOrderSubmit);
   document.getElementById('form-create-product')?.addEventListener('submit', handleProductSubmit);
   document.getElementById('form-create-user')?.addEventListener('submit', handleUserSubmit);
   document.getElementById('form-create-review')?.addEventListener('submit', handleReviewSubmit);
   document.getElementById('form-update-order-status')?.addEventListener('submit', handleUpdateOrderStatusSubmit);
+
+  // Logout Button
+  document.getElementById('btn-admin-logout')?.addEventListener('click', () => {
+    localStorage.removeItem('admin_token');
+    showToast('Admin session logged out.', 'success');
+    setTimeout(() => location.reload(), 500);
+  });
 
   // Confirm Delete Button Handler
   document.getElementById('btn-confirm-delete-submit')?.addEventListener('click', async () => {
@@ -111,6 +134,34 @@ function setupModals() {
       closeModal('modal-confirm-delete');
     }
   });
+}
+
+// Handle Admin Password Login Form Submit
+async function handleAdminLoginSubmit(e) {
+  e.preventDefault();
+  const password = document.getElementById('admin-password-input').value;
+
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+
+    const json = await res.json();
+    if (res.ok && json.success) {
+      localStorage.setItem('admin_token', json.token);
+      showToast('Admin authenticated successfully!', 'success');
+      document.getElementById('modal-admin-login').classList.remove('active');
+      loadDashboardKPIs();
+      loadOverviewAnalytics();
+      loadProducts();
+    } else {
+      showToast(json.error ? json.error.message : 'Invalid Admin password.', 'error');
+    }
+  } catch (err) {
+    showToast('Authentication server error', 'error');
+  }
 }
 
 function openModal(id) {
