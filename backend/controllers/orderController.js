@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { sendOrderConfirmationEmail } = require('../config/mailer');
 
 /**
  * GET /api/orders
@@ -275,6 +276,22 @@ const createOrder = async (req, res, next) => {
        WHERE oi.order_id = ?`,
       [newOrderId]
     );
+
+    // Fetch customer email for notification
+    const [custDetails] = await pool.execute('SELECT name, email FROM users WHERE user_id = ?', [userId]);
+
+    // Send Async Order Confirmation Email
+    if (custDetails.length > 0) {
+      sendOrderConfirmationEmail({
+        order_id: newOrderId,
+        customer_name: custDetails[0].name,
+        customer_email: custDetails[0].email,
+        order_date: finalOrder[0].order_date,
+        total_amount: runningTotal,
+        payment_method: payment_method,
+        items: finalItems
+      }).catch(err => console.warn('Email notify error:', err.message));
+    }
 
     res.status(201).json({
       success: true,
