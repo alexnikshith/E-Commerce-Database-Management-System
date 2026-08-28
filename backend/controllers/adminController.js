@@ -78,16 +78,17 @@ const getTopProducts = async (req, res, next) => {
 
     const query = `
       SELECT 
-        pss.product_id,
-        pss.product_name,
+        p.product_id,
+        p.product_name,
         c.category_name,
         p.price,
-        pss.units_sold,
-        pss.total_revenue
-      FROM product_sales_summary pss
-      JOIN products p ON pss.product_id = p.product_id
+        COALESCE(SUM(oi.quantity), 0) AS units_sold,
+        COALESCE(SUM(oi.quantity * oi.unit_price), 0) AS total_revenue
+      FROM products p
       JOIN categories c ON p.category_id = c.category_id
-      ORDER BY pss.total_revenue DESC, pss.units_sold DESC
+      LEFT JOIN order_items oi ON p.product_id = oi.product_id
+      GROUP BY p.product_id, p.product_name, c.category_name, p.price
+      ORDER BY total_revenue DESC, units_sold DESC
       LIMIT ?
     `;
 
