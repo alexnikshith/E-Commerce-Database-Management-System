@@ -181,11 +181,14 @@ function executeFallbackQuery(sql, params = []) {
   // 12. Admin Customer Spending
   if (/FROM users u/i.test(queryStr)) {
     return [[
-      { user_id: 1, customer_name: 'Rahul Sharma', email: 'rahul@gmail.com', total_orders: 1, total_spent: 90896.00 },
+      { user_id: 5, customer_name: 'Nikshith Gurram', email: 'nikshith@gmail.com', total_orders: 1, total_spent: 155897.00 },
+      { user_id: 4, customer_name: 'nicky', email: 'nicky@gmail.com', total_orders: 1, total_spent: 90896.00 },
+      { user_id: 1, customer_name: 'nicky', email: 'rahul@gmail.com', total_orders: 1, total_spent: 90896.00 },
       { user_id: 3, customer_name: 'David Thomas', email: 'david@gmail.com', total_orders: 1, total_spent: 74999.00 },
       { user_id: 2, customer_name: 'Ananya Reddy', email: 'ananya@gmail.com', total_orders: 1, total_spent: 4999.00 }
     ]];
   }
+
 
   // 13. Admin Low Stock View
   if (/FROM product_inventory_view/i.test(queryStr)) {
