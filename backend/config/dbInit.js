@@ -22,15 +22,19 @@ const DEFAULT_PRODUCTS = [
 ];
 
 const DEFAULT_USERS = [
-  { id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999' },
+  { id: 1, name: 'nicky', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999' },
   { id: 2, name: 'Ananya Reddy', email: 'ananya@gmail.com', password_hash: 'hash_ananya_456', phone: '9876543211' },
-  { id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212' }
+  { id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212' },
+  { id: 4, name: 'nicky', email: 'nicky@gmail.com', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', phone: '9999999999' },
+  { id: 5, name: 'Nikshith Gurram', email: 'nikshith@gmail.com', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', phone: '9876543210' }
 ];
 
 const DEFAULT_ORDERS = [
   { id: 1, user_id: 1, status: 'Confirmed', total_amount: 90896.00, order_date: '2026-08-27 14:04:10' },
   { id: 2, user_id: 2, status: 'Confirmed', total_amount: 4999.00, order_date: '2026-08-27 14:41:17' },
-  { id: 3, user_id: 3, status: 'Confirmed', total_amount: 74999.00, order_date: '2026-08-27 14:52:52' }
+  { id: 3, user_id: 3, status: 'Confirmed', total_amount: 74999.00, order_date: '2026-08-27 14:52:52' },
+  { id: 4, user_id: 4, status: 'Confirmed', total_amount: 90896.00, order_date: '2026-08-27 14:04:10' },
+  { id: 5, user_id: 5, status: 'Confirmed', total_amount: 155897.00, order_date: '2026-08-28 10:15:00' }
 ];
 
 const DEFAULT_ORDER_ITEMS = [
@@ -38,12 +42,17 @@ const DEFAULT_ORDER_ITEMS = [
   { id: 2, order_id: 1, product_id: 5, quantity: 2, unit_price: 4999.00 },
   { id: 3, order_id: 1, product_id: 6, quantity: 1, unit_price: 899.00 },
   { id: 4, order_id: 2, product_id: 5, quantity: 1, unit_price: 4999.00 },
-  { id: 5, order_id: 3, product_id: 2, quantity: 1, unit_price: 74999.00 }
+  { id: 5, order_id: 3, product_id: 2, quantity: 1, unit_price: 74999.00 },
+  { id: 6, order_id: 4, product_id: 1, quantity: 1, unit_price: 79999.00 },
+  { id: 7, order_id: 5, product_id: 1, quantity: 1, unit_price: 79999.00 },
+  { id: 8, order_id: 5, product_id: 2, quantity: 1, unit_price: 74999.00 },
+  { id: 9, order_id: 5, product_id: 6, quantity: 1, unit_price: 899.00 }
 ];
 
 const DEFAULT_PAYMENTS = [
   { id: 1, order_id: 1, method: 'UPI', status: 'Paid', amount: 90896.00 },
-  { id: 2, order_id: 3, method: 'UPI', status: 'Paid', amount: 74999.00 }
+  { id: 2, order_id: 3, method: 'UPI', status: 'Paid', amount: 74999.00 },
+  { id: 3, order_id: 5, method: 'UPI', status: 'Paid', amount: 155897.00 }
 ];
 
 /**
