@@ -22,13 +22,32 @@ const DEFAULT_PRODUCTS = [
 ];
 
 const DEFAULT_USERS = [
-  { id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9876543210' },
+  { id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999' },
   { id: 2, name: 'Ananya Reddy', email: 'ananya@gmail.com', password_hash: 'hash_ananya_456', phone: '9876543211' },
   { id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212' }
 ];
 
+const DEFAULT_ORDERS = [
+  { id: 1, user_id: 1, status: 'Confirmed', total_amount: 90896.00, order_date: '2026-08-27 14:04:10' },
+  { id: 2, user_id: 2, status: 'Confirmed', total_amount: 4999.00, order_date: '2026-08-27 14:41:17' },
+  { id: 3, user_id: 3, status: 'Confirmed', total_amount: 74999.00, order_date: '2026-08-27 14:52:52' }
+];
+
+const DEFAULT_ORDER_ITEMS = [
+  { id: 1, order_id: 1, product_id: 1, quantity: 1, unit_price: 79999.00 },
+  { id: 2, order_id: 1, product_id: 5, quantity: 2, unit_price: 4999.00 },
+  { id: 3, order_id: 1, product_id: 6, quantity: 1, unit_price: 899.00 },
+  { id: 4, order_id: 2, product_id: 5, quantity: 1, unit_price: 4999.00 },
+  { id: 5, order_id: 3, product_id: 2, quantity: 1, unit_price: 74999.00 }
+];
+
+const DEFAULT_PAYMENTS = [
+  { id: 1, order_id: 1, method: 'UPI', status: 'Paid', amount: 90896.00 },
+  { id: 2, order_id: 3, method: 'UPI', status: 'Paid', amount: 74999.00 }
+];
+
 /**
- * Seed default catalog items & inventory stock
+ * Seed default catalog items, inventory stock, and historical revenue orders
  */
 async function seedDefaultCatalogData() {
   const connection = await pool.getConnection();
@@ -72,9 +91,39 @@ async function seedDefaultCatalogData() {
       );
     }
 
+    // 4. Seed Default Orders
+    for (const o of DEFAULT_ORDERS) {
+      await connection.query(
+        `INSERT INTO orders (order_id, user_id, status, total_amount, order_date)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE status = VALUES(status), total_amount = VALUES(total_amount)`,
+        [o.id, o.user_id, o.status, o.total_amount, o.order_date]
+      );
+    }
+
+    // 5. Seed Order Items
+    for (const oi of DEFAULT_ORDER_ITEMS) {
+      await connection.query(
+        `INSERT INTO order_items (order_item_id, order_id, product_id, quantity, unit_price)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), unit_price = VALUES(unit_price)`,
+        [oi.id, oi.order_id, oi.product_id, oi.quantity, oi.unit_price]
+      );
+    }
+
+    // 6. Seed Payments
+    for (const p of DEFAULT_PAYMENTS) {
+      await connection.query(
+        `INSERT INTO payments (payment_id, order_id, payment_method, payment_status, amount)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE payment_method = VALUES(payment_method), amount = VALUES(amount)`,
+        [p.id, p.order_id, p.method, p.status, p.amount]
+      );
+    }
+
     await connection.commit();
     connection.release();
-    console.log('Successfully verified and seeded default product catalog & inventory stock.');
+    console.log('Successfully verified and seeded default catalog, inventory stock, and historical orders.');
     return { success: true, count: DEFAULT_PRODUCTS.length };
   } catch (error) {
     await connection.rollback();
@@ -215,15 +264,16 @@ async function initializeDatabase() {
       GROUP BY p.product_id, p.product_name;
     `);
 
-    // Check if products count is 0
+    // Check if products count is 0 or orders count is 0
     const [prodCheck] = await connection.query('SELECT COUNT(*) AS count FROM products');
+    const [ordCheck] = await connection.query('SELECT COUNT(*) AS count FROM orders');
     connection.release();
 
-    if (prodCheck[0].count === 0) {
-      console.log('No products detected in database. Triggering automatic catalog seed...');
+    if (prodCheck[0].count === 0 || ordCheck[0].count === 0) {
+      console.log('Catalog or historical orders missing. Triggering automatic database seed...');
       await seedDefaultCatalogData();
     } else {
-      console.log(`Database initialized cleanly with ${prodCheck[0].count} active products.`);
+      console.log(`Database initialized cleanly with ${prodCheck[0].count} active products and ${ordCheck[0].count} historical orders.`);
     }
   } catch (error) {
     console.error('Database initialization error:', error.message);
