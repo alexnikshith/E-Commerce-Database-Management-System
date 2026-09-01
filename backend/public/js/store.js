@@ -211,28 +211,86 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('active');
 }
 
+// Restore Catalog Action
+async function restoreProductCatalog() {
+  try {
+    const grid = document.getElementById('store-product-grid');
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Restoring catalog products and inventory...</p>';
+    
+    const res = await fetch('/api/products/seed', { method: 'POST' });
+    const json = await res.json();
+
+    if (json.success && json.data.length > 0) {
+      window.storeProductsCache = json.data;
+      renderProductGrid(json.data);
+      setupCategoryPills();
+      showToast('Product catalog restored with default items and inventory stock!', 'success');
+    } else {
+      showToast('Failed to restore catalog products.', 'error');
+      loadProducts();
+    }
+  } catch (e) {
+    showToast('Catalog restoration error.', 'error');
+  }
+}
+
 // Load Product Catalog Grid
 async function loadProducts() {
   try {
+    const grid = document.getElementById('store-product-grid');
     const res = await fetch('/api/products');
+    
+    if (!res.ok) {
+      throw new Error(`Server returned HTTP ${res.status}`);
+    }
+
     const json = await res.json();
 
-    const grid = document.getElementById('store-product-grid');
     if (json.success && json.data.length > 0) {
       window.storeProductsCache = json.data;
       renderProductGrid(json.data);
       setupCategoryPills();
     } else {
-      grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">No products currently available in store catalog.</p>';
+      // Auto-trigger seed if zero products found
+      console.log('Catalog empty on fetch. Attempting automatic restoration...');
+      const seedRes = await fetch('/api/products/seed', { method: 'POST' });
+      const seedJson = await seedRes.json();
+
+      if (seedJson.success && seedJson.data.length > 0) {
+        window.storeProductsCache = seedJson.data;
+        renderProductGrid(seedJson.data);
+        setupCategoryPills();
+      } else {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding:40px; background:var(--bg-main); border:1px dashed var(--border-color); border-radius:var(--radius-lg);">
+            <p style="color:var(--text-muted); font-size:15px; margin-bottom:14px;"><i class="fa-solid fa-box-open" style="font-size:24px; color:var(--accent-amber);"></i><br>No products currently available in store catalog.</p>
+            <button class="btn btn-buy" onclick="restoreProductCatalog()" style="display:inline-flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-rotate"></i> Restore Product Catalog
+            </button>
+          </div>
+        `;
+      }
     }
   } catch (e) {
     console.error('Failed to load products:', e);
+    const grid = document.getElementById('store-product-grid');
+    if (grid) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align:center; padding:40px; background:var(--bg-main); border:1px dashed var(--border-color); border-radius:var(--radius-lg);">
+          <p style="color:var(--text-secondary); font-size:14px; margin-bottom:14px;"><i class="fa-solid fa-triangle-exclamation" style="font-size:24px; color:var(--accent-amber);"></i><br>Unable to connect to product catalog database.</p>
+          <button class="btn btn-details" onclick="restoreProductCatalog()" style="display:inline-flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-rotate"></i> Re-connect & Restore Catalog
+          </button>
+        </div>
+      `;
+    }
   }
 }
 
 function renderProductGrid(products) {
   const grid = document.getElementById('store-product-grid');
   if (products.length === 0) {
+
     grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">No products match your search or filter.</p>';
     return;
   }

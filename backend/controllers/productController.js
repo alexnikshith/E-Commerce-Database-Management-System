@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { seedDefaultCatalogData } = require('../config/dbInit');
 
 /**
  * GET /api/products
@@ -472,11 +473,40 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/products/seed
+
+ * Restore default product catalog items and stock levels
+ */
+const seedProducts = async (req, res, next) => {
+  try {
+    const result = await seedDefaultCatalogData();
+    const [products] = await pool.query(`
+      SELECT p.product_id, p.product_name, p.description, p.price, p.brand, p.image_url, p.created_at, c.category_id, c.category_name, COALESCE(i.quantity, 0) AS stock_quantity
+      FROM products p
+      JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN inventory i ON p.product_id = i.product_id
+      ORDER BY p.product_id ASC
+    `);
+
+    res.status(200).json({
+      success: true,
+      message: 'Product catalog restored successfully.',
+      count: products.length,
+      data: products
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
   createProductReview,
-  deleteProduct
+  deleteProduct,
+  seedProducts
 };
+

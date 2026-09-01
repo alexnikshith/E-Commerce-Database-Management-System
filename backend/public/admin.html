@@ -181,13 +181,17 @@
         <!-- Tab 2: Product Catalog -->
         <section id="tab-products" class="tab-content">
           <div class="card">
-            <div class="filter-bar">
-              <div class="search-wrapper">
+            <div class="filter-bar" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+              <div class="search-wrapper" style="flex:1;">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <input type="text" id="product-search-input" class="search-input" placeholder="Search products or brand...">
               </div>
+              <button class="btn btn-secondary" id="btn-admin-restore-catalog" onclick="restoreAdminCatalog()" style="white-space:nowrap; gap:6px;">
+                <i class="fa-solid fa-rotate"></i> Restore Default Catalog
+              </button>
             </div>
             <div class="table-responsive">
+
               <table class="data-table">
                 <thead>
                   <tr>

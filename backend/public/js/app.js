@@ -260,6 +260,24 @@ async function loadOverviewAnalytics() {
   }
 }
 
+// Restore Admin Catalog Action
+async function restoreAdminCatalog() {
+  try {
+    const res = await fetch('/api/products/seed', { method: 'POST' });
+    const json = await res.json();
+    if (res.ok && json.success) {
+      showToast('Product catalog & stock levels restored!', 'success');
+      loadDashboardKPIs();
+      loadOverviewAnalytics();
+      loadProducts();
+    } else {
+      showToast(json.error ? json.error.message : 'Failed to restore catalog', 'error');
+    }
+  } catch (e) {
+    showToast('Catalog restoration error', 'error');
+  }
+}
+
 // 3. Load Products Tab
 async function loadProducts() {
   try {
@@ -271,12 +289,22 @@ async function loadProducts() {
       window.productsCache = json.data;
       renderProductsTable(json.data);
     } else {
-      body.innerHTML = '<tr><td colspan="7" style="text-align:center;">No products found in database.</td></tr>';
+      body.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center; padding:24px;">
+            No products found in database.<br><br>
+            <button class="btn btn-secondary" onclick="restoreAdminCatalog()" style="display:inline-flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-rotate"></i> Restore Default Catalog Data
+            </button>
+          </td>
+        </tr>
+      `;
     }
   } catch (e) {
     console.error('Failed to load products:', e);
   }
 }
+
 
 function renderProductsTable(products) {
   const body = document.getElementById('products-table-body');

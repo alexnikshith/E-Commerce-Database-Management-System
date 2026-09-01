@@ -1,8 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+const dotenv = require('dotenv');
 
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config();
+
+const { initializeDatabase } = require('./config/dbInit');
 const errorHandler = require('./middleware/errorHandler');
 const healthRoutes = require('./routes/healthRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -14,6 +19,9 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Database tables and verify catalog state on startup
+initializeDatabase().catch(err => console.error('Database startup init error:', err));
 
 // Middleware
 app.use(cors());
@@ -62,3 +70,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
