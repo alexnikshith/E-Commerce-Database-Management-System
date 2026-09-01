@@ -58,7 +58,8 @@ const FALLBACK_PRODUCTS = [
 const FALLBACK_USERS = [
   { user_id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999', created_at: '2026-08-27T06:39:49.000Z' },
   { user_id: 2, name: 'Ananya Reddy', email: 'ananya@gmail.com', password_hash: 'hash_ananya_456', phone: '9876543211', created_at: '2026-08-27T06:39:49.000Z' },
-  { user_id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212', created_at: '2026-08-27T06:39:49.000Z' }
+  { user_id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212', created_at: '2026-08-27T06:39:49.000Z' },
+  { user_id: 4, name: 'nicky', email: 'nicky@gmail.com', password_hash: 'hash_nicky_123', phone: '9999999999', created_at: '2026-08-27T06:39:49.000Z' }
 ];
 
 const FALLBACK_INVENTORY = FALLBACK_PRODUCTS.map((p, idx) => ({
@@ -74,8 +75,10 @@ const FALLBACK_INVENTORY = FALLBACK_PRODUCTS.map((p, idx) => ({
 const FALLBACK_ORDERS = [
   { order_id: 1, user_id: 1, customer_name: 'Rahul Sharma', customer_email: 'rahul@gmail.com', order_date: '2026-08-27T14:04:10.000Z', status: 'Confirmed', total_amount: 90896.00, total_items: 3 },
   { order_id: 2, user_id: 2, customer_name: 'Ananya Reddy', customer_email: 'ananya@gmail.com', order_date: '2026-08-27T14:41:17.000Z', status: 'Confirmed', total_amount: 4999.00, total_items: 1 },
-  { order_id: 3, user_id: 3, customer_name: 'David Thomas', customer_email: 'david@gmail.com', order_date: '2026-08-27T14:52:52.000Z', status: 'Confirmed', total_amount: 74999.00, total_items: 1 }
+  { order_id: 3, user_id: 3, customer_name: 'David Thomas', customer_email: 'david@gmail.com', order_date: '2026-08-27T14:52:52.000Z', status: 'Confirmed', total_amount: 74999.00, total_items: 1 },
+  { order_id: 4, user_id: 4, customer_name: 'nicky', customer_email: 'nicky@gmail.com', order_date: '2026-08-27T14:04:10.000Z', status: 'Confirmed', total_amount: 90896.00, total_items: 1 }
 ];
+
 
 const FALLBACK_ORDER_ITEMS = [
   { order_item_id: 1, order_id: 1, product_id: 1, product_name: 'iPhone 17', brand: 'Apple', quantity: 1, unit_price: '79999.00', item_total: 79999.00 },

@@ -612,10 +612,10 @@ async function loadCustomerOrdersDropdown() {
   if (!select) return;
 
   try {
-    const res = await fetch('/api/admin/customers');
+    const res = await fetch('/api/users');
     const json = await res.json();
     if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-      select.innerHTML = json.data.map(u => `<option value="${u.user_id}">${u.customer_name} (${u.email})</option>`).join('');
+      select.innerHTML = json.data.map(u => `<option value="${u.user_id}">${u.name || u.customer_name} (${u.email})</option>`).join('');
 
       const loggedUser = checkCustomerAuth();
       let targetUserId = null;
@@ -640,6 +640,7 @@ async function loadCustomerOrdersDropdown() {
     console.error('Failed to populate customer orders dropdown:', e);
   }
 }
+
 
 // Load Selected Customer Order History with auto-fallback
 async function loadCustomerOrderHistory(userId) {

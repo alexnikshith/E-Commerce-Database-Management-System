@@ -239,9 +239,28 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+/**
+ * GET /api/users
+ * Fetch all registered customer accounts
+ */
+const getAllUsers = async (req, res, next) => {
+  try {
+    const [users] = await pool.query('SELECT user_id, name, email, phone, created_at FROM users ORDER BY user_id ASC');
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users.map(u => ({ ...u, customer_name: u.name }))
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUserOrders,
   createUser,
   deleteUser,
-  loginUser
+  loginUser,
+  getAllUsers
 };
+
