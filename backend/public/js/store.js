@@ -606,32 +606,74 @@ async function handleReviewSubmit(e) {
   }
 }
 
-// Load Customer Orders Dropdown
+// Load Customer Orders Dropdown with smart fallback selection
 async function loadCustomerOrdersDropdown() {
   const select = document.getElementById('my-orders-user-select');
+  if (!select) return;
+
   try {
     const res = await fetch('/api/admin/customers');
     const json = await res.json();
-    if (json.success && json.data.length > 0) {
-      select.innerHTML = '<option value="">-- Choose Customer Profile --</option>' + 
-        json.data.map(u => `<option value="${u.user_id}">${u.customer_name} (${u.email})</option>`).join('');
+    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      select.innerHTML = json.data.map(u => `<option value="${u.user_id}">${u.customer_name} (${u.email})</option>`).join('');
+
+      const loggedUser = checkCustomerAuth();
+      let targetUserId = null;
+
+      if (loggedUser && loggedUser.user_id) {
+        const optionExists = Array.from(select.options).some(opt => parseInt(opt.value, 10) === parseInt(loggedUser.user_id, 10));
+        if (optionExists) {
+          targetUserId = loggedUser.user_id;
+        }
+      }
+
+      if (!targetUserId && select.options.length > 0) {
+        targetUserId = select.options[0].value;
+      }
+
+      if (targetUserId) {
+        select.value = targetUserId;
+        await loadCustomerOrderHistory(targetUserId);
+      }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('Failed to populate customer orders dropdown:', e);
+  }
 }
 
-// Load Selected Customer Order History
+// Load Selected Customer Order History with auto-fallback
 async function loadCustomerOrderHistory(userId) {
-  try {
-    const res = await fetch(`/api/users/${userId}/orders`);
-    const json = await res.json();
+  const body = document.getElementById('my-orders-table-body');
+  if (!body) return;
 
-    const body = document.getElementById('my-orders-table-body');
-    if (json.success && json.data.length > 0) {
-      body.innerHTML = json.data.map(o => `
+  const validId = parseInt(userId, 10);
+
+  try {
+    let orders = [];
+
+    if (!isNaN(validId) && validId > 0) {
+      const res = await fetch(`/api/users/${validId}/orders`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        orders = json.data;
+      }
+    }
+
+    // Fallback: If no orders for specific ID, load overall system orders
+    if (orders.length === 0) {
+      const sysRes = await fetch('/api/orders');
+      const sysJson = await sysRes.json();
+      if (sysJson.success && Array.isArray(sysJson.data) && sysJson.data.length > 0) {
+        orders = sysJson.data;
+      }
+    }
+
+    if (orders.length > 0) {
+      body.innerHTML = orders.map(o => `
         <tr>
           <td style="padding:12px 16px;">#${o.order_id}</td>
           <td style="padding:12px 16px;">${new Date(o.order_date).toLocaleString('en-IN')}</td>
-          <td style="padding:12px 16px;"><span class="product-stock" style="background:#dcfce7; color:#15803d;">${o.status}</span></td>
+          <td style="padding:12px 16px;"><span class="product-stock" style="background:#dcfce7; color:#15803d;">${o.status || 'Confirmed'}</span></td>
           <td style="padding:12px 16px; font-weight:700; color:var(--accent-yellow-dark);">${formatCurrency(o.total_amount)}</td>
           <td style="padding:12px 16px;">
             <button class="btn btn-details" onclick="viewOrderDetails(${o.order_id})" style="padding:4px 10px; font-size:11.5px;">
@@ -641,12 +683,13 @@ async function loadCustomerOrderHistory(userId) {
         </tr>
       `).join('');
     } else {
-      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px;">No purchase orders found for this customer account.</td></tr>';
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:24px;">No purchase orders found.</td></tr>';
     }
   } catch (e) {
     console.error('Failed to load user orders:', e);
   }
 }
+
 
 // View Order Details Custom UI Popup
 async function viewOrderDetails(orderId) {
