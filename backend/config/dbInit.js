@@ -22,12 +22,13 @@ const DEFAULT_PRODUCTS = [
 ];
 
 const DEFAULT_USERS = [
-  { id: 1, name: 'nicky', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999' },
+  { id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999' },
   { id: 2, name: 'Ananya Reddy', email: 'ananya@gmail.com', password_hash: 'hash_ananya_456', phone: '9876543211' },
   { id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212' },
   { id: 4, name: 'nicky', email: 'nicky@gmail.com', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', phone: '9999999999' },
   { id: 5, name: 'Nikshith Gurram', email: 'nikshith@gmail.com', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', phone: '9876543210' }
 ];
+
 
 const DEFAULT_ORDERS = [
   { id: 1, user_id: 1, status: 'Confirmed', total_amount: 90896.00, order_date: '2026-08-27 14:04:10' },

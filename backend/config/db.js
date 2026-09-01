@@ -59,7 +59,8 @@ const FALLBACK_USERS = [
   { user_id: 1, name: 'Rahul Sharma', email: 'rahul@gmail.com', password_hash: 'hash_rahul_123', phone: '9999999999', created_at: '2026-08-27T06:39:49.000Z' },
   { user_id: 2, name: 'Ananya Reddy', email: 'ananya@gmail.com', password_hash: 'hash_ananya_456', phone: '9876543211', created_at: '2026-08-27T06:39:49.000Z' },
   { user_id: 3, name: 'David Thomas', email: 'david@gmail.com', password_hash: 'hash_david_789', phone: '9876543212', created_at: '2026-08-27T06:39:49.000Z' },
-  { user_id: 4, name: 'nicky', email: 'nicky@gmail.com', password_hash: 'hash_nicky_123', phone: '9999999999', created_at: '2026-08-27T06:39:49.000Z' }
+  { user_id: 4, name: 'nicky', email: 'nicky@gmail.com', password_hash: 'hash_nicky_123', phone: '9999999999', created_at: '2026-08-27T06:39:49.000Z' },
+  { user_id: 5, name: 'Nikshith Gurram', email: 'nikshith@gmail.com', password_hash: 'hash_nikshith_456', phone: '9876543210', created_at: '2026-08-28T04:45:00.000Z' }
 ];
 
 const FALLBACK_INVENTORY = FALLBACK_PRODUCTS.map((p, idx) => ({
@@ -183,7 +184,7 @@ function executeFallbackQuery(sql, params = []) {
     return [[
       { user_id: 5, customer_name: 'Nikshith Gurram', email: 'nikshith@gmail.com', total_orders: 1, total_spent: 155897.00 },
       { user_id: 4, customer_name: 'nicky', email: 'nicky@gmail.com', total_orders: 1, total_spent: 90896.00 },
-      { user_id: 1, customer_name: 'nicky', email: 'rahul@gmail.com', total_orders: 1, total_spent: 90896.00 },
+      { user_id: 1, customer_name: 'Rahul Sharma', email: 'rahul@gmail.com', total_orders: 1, total_spent: 90896.00 },
       { user_id: 3, customer_name: 'David Thomas', email: 'david@gmail.com', total_orders: 1, total_spent: 74999.00 },
       { user_id: 2, customer_name: 'Ananya Reddy', email: 'ananya@gmail.com', total_orders: 1, total_spent: 4999.00 }
     ]];
